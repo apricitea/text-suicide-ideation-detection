@@ -1,0 +1,40 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: hunspell-id
+Upstream-Contact: Shulhan <ms@kilabit.info>
+Source: https://github.com/shuLhan/hunspell-id
+
+Files: .gitmodules
+Copyright: 2020 M. Shulhan <ms@kilabit.info>
+License: LGPL-3.0-only
+
+Files: AUR/*
+Copyright: 2022 M. Shulhan <ms@kilabit.info>
+License: LGPL-3.0-only
+
+Files: debian/*
+Copyright: hunspell-id Authors
+License: LGPL-3.0-only
+
+Files: id_ID.dic
+Copyright: hunspell-id Authors
+License: LGPL-3.0-only
+
+Files: libreoffice-extension/th_id_ID_v2.dat
+       libreoffice-extension/README-thes
+Copyright: Copyright (C) 2008 Pusat Bahasa Departemen Pendidikan Nasional RI
+           Copyright (C) 2017 Ali Ahmadi <idnux09@gmail.com>
+License: LGPL-2.1-only
+
+Files: libreoffice-extension/bendera.jpg
+       libreoffice-extension/description.xml
+       libreoffice-extension/dictionaries.xcu
+       libreoffice-extension/hyph_id_ID.dic
+       libreoffice-extension/META-INF/manifest.xml
+       libreoffice-extension/README-dict.md
+       libreoffice-extension/info/*
+Copyright: hunspell-id Authors
+License: LGPL-3.0-only
+
+Files: vim/*
+Copyright: 2019 M. Shulhan <ms@kilabit.info>
+License: LGPL-3.0-only

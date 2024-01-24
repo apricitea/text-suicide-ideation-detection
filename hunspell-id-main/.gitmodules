@@ -1,0 +1,3 @@
+[submodule "AUR"]
+	path = AUR
+	url = https://aur.archlinux.org/hunspell-id.git
