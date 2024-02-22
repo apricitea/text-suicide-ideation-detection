@@ -27,6 +27,9 @@ scikeras = "^0.12.0"
 fasttext = {git = "https://github.com/cfculhane/fastText", rev = "main"}
 openpyxl = "^3.1.2"
 pyarrow = "^15.0.0"
+tweepy = "^4.14.0"
+langdetect = "^1.0.9"
+stanza = "^1.7.0"
 
 [tool.poetry.group.dev.dependencies]
 ipykernel = "^6.29.0"
