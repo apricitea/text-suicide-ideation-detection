@@ -1,11 +1,29 @@
-# Suicide Ideation Detection using Fasttext Word Embedding and LSTM
+# Suicide Ideation Detection using FastText Word Embeddings and LSTM
 
-This project was originally my undergraduate thesis but then I decided to documented it so that everyone can give it a try too!. You can check the deployed model on [my huggingface here!](https://huggingface.co/apricitea)
+Originally my undergraduate thesis, documented here for reproducibility. A deployed
+version of the model is on [HuggingFace](https://huggingface.co/apricitea); full write-up
+of the process is on [Medium](https://medium.com/@apricitea).
 
-The project can be reproduced by using Poetry package manager by building a virtual environment for all the dependencies needed to run the (almost) entire process. The Free Twitter (now, known as X) Developer API access can't query tweets anymore but you can use the final_dataset.xlsx available on this project. For full steps taken by me to complete the project, you can read the post on [my medium here!](https://medium.com/@apricitea) 
+This is a research/educational project on Indonesian-language text classification, not a
+clinical or diagnostic tool — model outputs should not be treated as a substitute for
+professional mental health assessment.
 
-Explanation about the folder and files in this repository:
-- dataset: contains the final dataset that i use to build the deployed model 
-- hunspell-id-main: tools needed to build a hunspell stemmer and stopword removal function
-- main: primary documentation of the steps i performed to build the model. 1) crawling twitter data using the twitter_crawl_data.ipnyb, 2) performing stemming and stopwords removal comparison of three different tools (sastrawi, hunspell, and stanza), and 3) perform preprocessing, building word clouds, loading the word embedding matrix, building the text classification model, and evaluating the metrics of each different model-building scenarios.
-- IMPORTANT: what my repository doesn't contain: pre-trained fasttext word vectors for indonesian language. you can [find it here](https://fasttext.cc/docs/en/crawl-vectors.html) and download it yourself (Ctrl+F to find "Indonesia" and download the .bin file).
+## Reproducing it
+
+Dependencies are managed with Poetry. Twitter's free Developer API no longer supports
+querying historical tweets, so `dataset/final_dataset.xlsx` is included directly instead
+of a live crawl.
+
+## Repository contents
+
+- `dataset/` — the final dataset used to train the deployed model
+- `hunspell-id-main/` — tools for building a Hunspell stemmer and stopword-removal
+  function
+- `main/` — the pipeline: (1) Twitter data crawling (`twitter_crawl_data.ipynb`),
+  (2) comparing three stemming/stopword-removal tools (Sastrawi, Hunspell, Stanza),
+  (3) preprocessing, word clouds, loading the embedding matrix, model training, and
+  metric evaluation across scenarios
+
+**Not included**: pre-trained FastText word vectors for Indonesian — download them from
+[fastText's crawl vectors](https://fasttext.cc/docs/en/crawl-vectors.html) (search for
+"Indonesian" and grab the `.bin` file).
