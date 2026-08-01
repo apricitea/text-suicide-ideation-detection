@@ -41,6 +41,11 @@ poetry install --with transformer  # only needed for main/indobert_finetune.py
 cd main && poetry run python indobert_finetune.py
 ```
 
+Python floor is `>=3.10` for current dependency versions. `cyhunspell` (used only in the Hunspell
+arm of the stemming comparison) has no wheels past Python 3.9, so it's split into its own
+optional `hunspell` group — install it separately under a 3.9 interpreter if you need that
+specific comparison arm; everything else works on 3.10/3.11.
+
 ## Repository contents
 
 - `dataset/` — the final dataset used to train the deployed model

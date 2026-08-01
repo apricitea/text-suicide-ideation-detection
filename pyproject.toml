@@ -6,12 +6,11 @@ authors = ["Your Name <you@example.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.9,<3.12"
+python = ">=3.10,<3.12"
 numpy = "^1.26.3"
 pandas = "^2.2.0"
-scikit-learn = "1.2.0"
+scikit-learn = "^1.5.0"
 sastrawi = "1.0.1"
-cyhunspell = "2.0.2"
 imblearn = "0.0"
 tensorflow = {version = "^2.13.0" }
 tensorflow-macos = { version = "^2.13.0", platform = "darwin", markers = "platform_machine=='arm64'" }
@@ -26,16 +25,34 @@ tensorflow-io-gcs-filesystem = [
 scikeras = "^0.12.0"
 fasttext = {git = "https://github.com/cfculhane/fastText", rev = "main"}
 openpyxl = "^3.1.2"
-pyarrow = "^15.0.0"
+pyarrow = ">=23.0.1"
 tweepy = "^4.14.0"
 langdetect = "^1.0.9"
-stanza = "^1.7.0"
+stanza = ">=1.12.2"
+requests = ">=2.33.0"
+urllib3 = ">=2.7.0"
+idna = ">=3.15"
+pygments = ">=2.20.0"
+setuptools = ">=83.0.0"
+
+[tool.poetry.group.hunspell]
+optional = true
+
+[tool.poetry.group.hunspell.dependencies]
+# Only has wheels for Python <3.10 (last release 2021). Split out so the rest
+# of the project can target current Python + patched dependency versions;
+# install this group only if you need the Hunspell arm of the
+# stemming/stopword-removal comparison in stemming_and_stopwords_comparison.ipynb,
+# under a Python 3.9 interpreter.
+cyhunspell = {version = "2.0.2", python = "<3.10"}
 
 [tool.poetry.group.dev.dependencies]
 ipykernel = "^6.29.0"
+tornado = ">=6.5.7"
+pyasn1 = ">=0.6.4"
 
 [tool.poetry.group.transformer.dependencies]
-torch = "^2.2.0"
+torch = ">=2.10.0"
 transformers = "^4.40.0"
 accelerate = "^0.30.0"
 
