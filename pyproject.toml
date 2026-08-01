@@ -33,6 +33,7 @@ requests = ">=2.33.0"
 urllib3 = ">=2.7.0"
 idna = ">=3.15"
 pygments = ">=2.20.0"
+werkzeug = ">=3.0.6"
 setuptools = ">=83.0.0"
 
 [tool.poetry.group.hunspell]
@@ -53,7 +54,7 @@ pyasn1 = ">=0.6.4"
 
 [tool.poetry.group.transformer.dependencies]
 torch = ">=2.10.0"
-transformers = "^4.40.0"
+transformers = ">=5.5.0"
 accelerate = "^0.30.0"
 
 [build-system]
