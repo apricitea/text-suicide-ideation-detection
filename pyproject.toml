@@ -34,6 +34,11 @@ stanza = "^1.7.0"
 [tool.poetry.group.dev.dependencies]
 ipykernel = "^6.29.0"
 
+[tool.poetry.group.transformer.dependencies]
+torch = "^2.2.0"
+transformers = "^4.40.0"
+accelerate = "^0.30.0"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"

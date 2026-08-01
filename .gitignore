@@ -1,2 +1,5 @@
 
 *.env
+main/indobert_output/
+__pycache__/
+*.pyc
