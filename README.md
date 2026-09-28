@@ -60,3 +60,17 @@ specific comparison arm; everything else works on 3.10/3.11.
 **Not included**: pre-trained FastText word vectors for Indonesian — download them from
 [fastText's crawl vectors](https://fasttext.cc/docs/en/crawl-vectors.html) (search for
 "Indonesian" and grab the `.bin` file).
+
+---
+
+## Data provenance
+
+`dataset/final_dataset.xlsx` is a corpus of Indonesian-language posts collected from
+X (Twitter) through the public API and labelled for suicide-ideation content. The file is
+committed because Twitter's free developer API no longer permits historical queries, so
+the training data cannot be re-fetched for reproducibility.
+
+The post text is third-party user-generated content. It is **not our work**, we assert no
+licence over it, and it is included here for research reproducibility only. The labels,
+preprocessing pipeline and models in this repository are our own work, released under the
+MIT licence in `LICENSE`.
