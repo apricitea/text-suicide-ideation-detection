@@ -1,5 +1,8 @@
 # Suicide Ideation Detection — FastText+LSTM (thesis) vs. Fine-Tuned IndoBERT
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Hugging Face Space](https://img.shields.io/badge/demo-HuggingFace-yellow.svg)](https://huggingface.co/spaces/apricitea/suicide-detection)
+
 Originally my undergraduate thesis (FastText embeddings + LSTM). A deployed
 version of that model is on [HuggingFace](https://huggingface.co/apricitea); full write-up
 of the process is on [Medium](https://medium.com/@apricitea). Since then I added a
