@@ -33,13 +33,24 @@ from pathlib import Path
 
 import pandas as pd
 
-HANDLE_RE = re.compile(r"(?<![\w.@])@([A-Za-z0-9_]{2,15})")
+HANDLE_RE = re.compile(r"(?<![\w@])@([A-Za-z0-9_]{2,30})")
+# The lookbehind deliberately allows a preceding '.' (a handle is often glued to
+# the end of a sentence: "...di buat2...@aniesbaswedan"), while still refusing a
+# preceding word character so that email addresses are left alone.
+# Twitter handles max out at 15 characters, but this corpus also contains longer
+# run-together account names (@satlantaspolresmanokwari is 24), which are still
+# identifiers. A 15-char cap truncated those and left the tail in the text.
+PSEUDONYM_RE = re.compile(r"^user_[0-9a-f]{8}$")
 # Same pattern, but excluding the pseudonyms this script itself writes, so the
 # verification pass measures real residual identifiers rather than its own output.
 # The trailing guard is explicit ASCII rather than \b: the corpus contains
 # multi-byte characters directly after a handle, and a Unicode \b treats those
 # as word characters, which silently made this check report false positives.
-VERIFY_RE = re.compile(r"(?<![\w.@])@(?!user_[0-9a-f]{8}(?![0-9A-Za-z_]))([A-Za-z0-9_]{2,15})")
+VERIFY_RE = re.compile(r"(?<![\w@])@(?!user_[0-9a-f]{8}(?![0-9A-Za-z_]))([./]?)([A-Za-z0-9_]{2,30})")
+# '@.name' / '@/name': a separator between '@' and the name, so the lookbehind above
+# and the first-character requirement in HANDLE_RE both miss them. Applied as a
+# second pass. HANDLE_RE is left alone so the primary substitution is unchanged.
+SEP_HANDLE_RE = re.compile(r"@([./])([A-Za-z0-9_]{2,30})")
 PROFILE_URL_RE = re.compile(
     r"https?://(?:www\.)?(?:twitter|x)\.com/([A-Za-z0-9_]{2,15})/status/(\d+)"
 )
@@ -60,15 +71,27 @@ def load_salt(path: Path) -> str:
 
 
 def pseudonymise(text: str, salt: str, mapping: dict[str, str]) -> str:
-    def repl_handle(m: re.Match) -> str:
-        handle = m.group(1)
+    def pseudo_for(handle: str) -> str:
         key = handle.lower()
+        # Idempotent: re-running over already-pseudonymised text must not
+        # pseudonymise the pseudonyms.
+        if PSEUDONYM_RE.match(key):
+            return f"@{key}"
         if key not in mapping:
             digest = hashlib.sha256((salt + key).encode()).hexdigest()[:8]
             mapping[key] = f"@user_{digest}"
         return mapping[key]
 
+    def repl_handle(m: re.Match) -> str:
+        return pseudo_for(m.group(1))
+
+    def repl_sep(m: re.Match) -> str:
+        # '@.name' and '@/name' occur in the corpus as typos/quotes. The leading
+        # separator is kept so the text reads the same; only the name is replaced.
+        return "@" + m.group(1) + pseudo_for(m.group(2))
+
     text = HANDLE_RE.sub(repl_handle, text)
+    text = SEP_HANDLE_RE.sub(repl_sep, text)
     # twitter.com/<user>/status/<id> -> keep the id, drop the account name
     text = PROFILE_URL_RE.sub(lambda m: f"https://twitter.com/i/status/{m.group(2)}", text)
     return text
@@ -98,6 +121,12 @@ def main() -> None:
     ap.add_argument("--out", type=Path, default=Path("release"))
     ap.add_argument("--salt-file", type=Path, default=Path("private/pseudonym_salt.txt"))
     ap.add_argument("--map-file", type=Path, default=Path("private/handle_map.jsonl"))
+    ap.add_argument(
+        "--repair-mojibake",
+        action="store_true",
+        help="Also undo cp1252-mangled emoji. Off by default so the published "
+             "corpus stays aligned with the metrics the repo reports.",
+    )
     args = ap.parse_args()
 
     salt = load_salt(args.salt_file)
@@ -118,7 +147,7 @@ def main() -> None:
         for m in ANY_URL_RE.finditer(raw):
             before_counts["url"] += 1
 
-        repaired, changed = repair_mojibake(raw)
+        repaired, changed = repair_mojibake(raw) if args.repair_mojibake else (raw, False)
         if changed:
             mojibake_fixed += 1
         clean = pseudonymise(repaired, salt, mapping)
@@ -154,12 +183,22 @@ def main() -> None:
         for r in records:
             fh.write(json.dumps(r, ensure_ascii=False) + "\n")
 
-    # mapping stays outside the release dir
+    # mapping stays outside the release dir. Merged with whatever is already there,
+    # so running this after pseudonymise_workbook.py does not drop the handles
+    # that only appear in the non-training sheets.
     args.map_file.parent.mkdir(parents=True, exist_ok=True)
+    existing: dict[str, str] = {}
+    if args.map_file.exists():
+        for line in args.map_file.read_text().splitlines():
+            if line.strip():
+                rec = json.loads(line)
+                existing[rec["handle"]] = rec["pseudonym"]
+    existing.update(mapping)
     with args.map_file.open("w") as fh:
-        for handle, pseudo in sorted(mapping.items()):
+        for handle, pseudo in sorted(existing.items()):
             fh.write(json.dumps({"handle": handle, "pseudonym": pseudo}) + "\n")
     args.map_file.chmod(0o600)
+    mapping = existing
 
     manifest = {
         "source_file": str(args.xlsx),

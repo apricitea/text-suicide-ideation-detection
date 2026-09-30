@@ -77,3 +77,38 @@ The post text is third-party user-generated content. It is **not our work**, we 
 licence over it, and it is included here for research reproducibility only. The labels,
 preprocessing pipeline and models in this repository are our own work, released under the
 MIT licence in `LICENSE`.
+
+### Identifiers in the corpus were pseudonymised
+
+The corpus originally carried live account names. Measured across all six sheets of the
+workbook, there were 27,559 `@handle` occurrences covering 7,602 distinct accounts; in the
+`10k` training sheet alone, 4,318 of 10,128 rows contained a handle and **296 of those rows
+carried the positive (ideation) label.** An account name next to a mental-health label is
+identifiable personal data, so before publishing the workbook every handle was replaced
+with a stable pseudonym (`@user_` + 8 hex characters of `sha256(salt ‖ handle)`), and
+`twitter.com/<user>/status/<id>` URLs were rewritten to their id-only form.
+
+Text and labels are otherwise unchanged, so this file is still the corpus the reported
+metrics were computed from, apart from the handle substitution. The salt and the
+handle → pseudonym map are kept out of the repository (`private/`, gitignored), so the
+mapping is reversible for us and not for a reader.
+
+Reproduce or verify it with:
+
+```bash
+python main/pseudonymise_workbook.py --check    # measure handles, write nothing
+python main/pseudonymise_workbook.py --write    # apply the transform
+```
+
+The transform verifies its own output and refuses to write if any handle survives.
+
+Two things were deliberately left alone:
+
+- **Emoji mojibake.** The workbook mis-decoded UTF-8 as cp1252, so emoji are stored as
+  sequences like `ðŸ˜”`. 1,450 rows in the `10k` sheet are affected. A repair exists in
+  `main/build_public_release.py --repair-mojibake` but is off by default, so that this
+  file matches the metrics reported below.
+- **Three corporate email addresses** appearing inside post text
+  (`info@careerbridge.coach`, `help@dana.id`). These are business support addresses, not
+  personal accounts, and the handle transform does not touch text preceded by a word
+  character.
