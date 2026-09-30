@@ -3,3 +3,7 @@
 main/indobert_output/
 __pycache__/
 *.pyc
+
+# release artifacts and the reversible handle map
+release/
+private/
