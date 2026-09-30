@@ -56,8 +56,13 @@ matters.
 The repository previously reported IndoBERT at F1 0.90 / accuracy 0.96 with no
 artifact behind it — the training script discarded the weights. This checkpoint
 is a full retrain from the committed corpus with the hyperparameters that script
-specified, run on CPU (4 threads, no GPU), and it lands at **F1 0.9098 /
-accuracy 0.9650**, i.e. it reproduces the reported figures.
+specified, run on CPU (4 threads, no GPU): **F1 0.9098 / accuracy 0.9650**.
+
+That is consistent with the reported figures but not bit-identical to them — it
+lands marginally higher (F1 0.9098 vs 0.90, accuracy 0.9650 vs 0.96). The
+original run used a 2023-era library stack on a GPU; this one is torch 2.14 /
+transformers 5.17 on CPU, and the small gap is what that kind of change produces.
+Treat it as a reproduction to within about one point, not an exact one.
 
 Full per-class report, confusion matrix and the training configuration are in
 [`metrics.json`](metrics.json). The 2,026 validation predictions (gold, predicted
