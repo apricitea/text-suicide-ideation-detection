@@ -7,3 +7,7 @@ __pycache__/
 # release artifacts and the reversible handle map
 release/
 private/
+
+# fine-tuned weights: published to HuggingFace, not to git
+indobert_publish/model/
+*.safetensors

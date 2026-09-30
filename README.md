@@ -30,8 +30,16 @@ handle the 8:2 class imbalance; both *reduced* F1 relative to no treatment (bett
 much worse precision) — see `main/lstm.ipynb`. IndoBERT wasn't given any imbalance
 treatment either, and didn't need it.
 
-Fine-tuned IndoBERT weights aren't committed (too large for git) — rerun
-`main/indobert_finetune.py` to reproduce, takes ~35 min on an RTX 3050 6GB.
+Fine-tuned IndoBERT weights aren't committed to git (too large). They are
+published on HuggingFace at
+[`apricitea/indobert-suicide-ideation`](https://huggingface.co/apricitea/indobert-suicide-ideation),
+together with `metrics.json` and the validation predictions.
+
+`main/indobert_finetune.py` now saves the model it trains. The original version
+trained for ~35 minutes and discarded the weights, which is why the numbers below
+had no artifact behind them for so long. The script was re-run on this corpus and
+reproduced them: **F1 0.9098 / accuracy 0.9650** (reported: 0.90 / 0.96). The
+committed run is a CPU run — 4 threads, no GPU, ~2 hours.
 
 ## Reproducing it
 
