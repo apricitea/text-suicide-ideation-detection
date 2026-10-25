@@ -32,9 +32,10 @@ of 10{,}128 posts are exact duplicates, and the evaluation split was drawn at ra
 deduplication: \textbf{739 of the 2{,}026 validation posts (36.5\%) also appear, near-verbatim, in
 the training half}. Scored only on the 1{,}287 genuinely unseen validation posts, IndoBERT's
 positive-class \fone{} falls from 0.910 to \textbf{0.877} (95\% bootstrap CI 0.845--0.904).
-A linear model over character $n$-grams, trained on the same data with no Indonesian
-preprocessing, reaches 0.787; the transformer's remaining advantage is \textbf{+0.090 \fone}
-(95\% CI +0.049 to +0.131; McNemar $p=6.3\times10^{-4}$). The probabilities are well calibrated
+Retraining on a deduplicated split, so the weights never see the twins either, gives
+\textbf{0.849} [0.821, 0.877] on 1{,}586 unseen posts, against 0.785 [0.749, 0.819] for the
+strongest classical baseline. The transformer's advantage is \textbf{+0.064 \fone}
+[+0.029, +0.105], McNemar $p=0.015$: real, but about half what the published comparison implied. The probabilities are well calibrated
 in aggregate (ECE 0.046), which makes an operating-point analysis meaningful: reaching 90\% recall
 requires flagging 21.8\% of the corpus at 83.6\% precision. The contribution is negative and
 methodological --- the reported gain is real but roughly a third smaller than published, and the
@@ -167,6 +168,47 @@ modest, and the published margin overstated it.
   \label{fig:scores}
 \end{figure}
 
+\subsection{Closing the loop: retraining on a deduplicated split}
+
+Scoring unseen rows of a model that memorised their twins removes the direct overlap but not
+the advantage those twins gave the weights. The clean protocol removes the cause: deduplicate
+the corpus first, draw a fresh 80/20 split in which no observation or near-duplicate of one
+appears on both sides, fine-tune with the same hyperparameters (seed 1, three epochs,
+\texttt{max\_length} 128), and evaluate once on the held-out half.
+
+The training half shrinks from 8{,}102 to 6{,}340 posts and the validation half from 2{,}026 to
+1{,}586 (311 positive), with zero cross-split duplicates.
+
+\begin{table}[t]
+  \centering
+  \small
+  \begin{tabular}{lccc}
+    \toprule
+    Protocol & Validation rows & IndoBERT \fone & Strongest baseline \\
+    \midrule
+    A. Published split, as reported & 2{,}026 & 0.910 & --- \\
+    B. Same weights, unseen rows & 1{,}287 & 0.877 [0.845, 0.904] & 0.787 [0.744, 0.827] \\
+    C. Deduplicate, re-split, retrain & 1{,}586 & \textbf{0.849} [0.821, 0.877] & 0.785 [0.749, 0.819] \\
+    \bottomrule
+  \end{tabular}
+  \caption{Positive-class \fone{} under three protocols. A$\rightarrow$B is what the duplicate
+  overlap was worth in the evaluation; B$\rightarrow$C is what the leaked twins were worth to the
+  weights. Intervals are 95\% stratified bootstraps (2{,}000 resamples).}
+  \label{tab:protocols}
+\end{table}
+
+Three points follow. First, the published 0.910 decomposes cleanly: 3.3 points came from
+evaluating on rows the model had seen, and a further 2.8 points came from the weights having
+been trained beside those rows. Second, the transformer's remaining advantage over a linear
+model is \textbf{+0.064} \fone{} [+0.029, +0.105], McNemar $p=0.015$ --- a real effect at this
+sample size, but roughly half the gap the published pair implied. Third, the baselines reorder
+between protocols (word $n$-grams overtake character $n$-grams under the clean split), which is
+a useful warning that a one-point difference between baselines is not a finding.
+
+The comparator under protocol C is a word 1--2-gram TF-IDF model with logistic regression,
+trained on raw text with no Indonesian stemming. That disadvantages it relative to the
+preprocessed thesis arm and therefore does not flatter the transformer.
+
 \section{Calibration and operating points}
 
 A single threshold at 0.5 is not how a screening classifier is used. The relevant question is how
@@ -268,11 +310,11 @@ report an interval.
 \section{Limitations}
 
 \begin{enumerate}
-  \item \textbf{IndoBERT is not retrained on a deduplicated split.} Its weights saw the leaked
-  twins, so scoring only unseen rows removes direct overlap but not the indirect effect of having
-  memorised near-identical text. The 0.877 estimate is therefore, if anything, optimistic. A
-  fully clean protocol requires retraining; the script supports it and the run is a documented
-  next step, not a claim.
+  \item \textbf{Protocol C is one run, one seed.} The retrain took 6{,}434 seconds on four CPU
+  threads and was executed once. The interval in Table~\ref{tab:protocols} is sampling
+  uncertainty on the validation set, not run-to-run variance; a second seed would likely move the
+  point estimate by about a point. Protocol C is also not recalibrated, so the operating-point
+  table still comes from protocol B.
   \item \textbf{The thesis arm cannot be re-run.} FastText vectors are not in the repository and
   the Keras tokenizer was not saved with the model, so its per-row predictions do not exist.
   \item \textbf{One split, one seed.} The comparison conditions on a single 80/20 draw. Repeated
