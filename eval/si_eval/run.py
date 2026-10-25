@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import os
 import json
 import platform
 import subprocess
@@ -323,6 +324,11 @@ def main(argv: list[str] | None = None) -> int:
         },
         "config": {"n_boot": args.n_boot, "seed": args.seed, "quick": args.quick},
         "versions": _versions(),
+        # Thread count changes floating-point summation order: two runs with different
+        # OMP/BLAS settings agree to ~1e-6 on baseline coefficients, not bit-for-bit.
+        "thread_environment": {
+            k: v for k, v in os.environ.items() if k.endswith("NUM_THREADS")
+        },
         "figures": {k: str(v.relative_to(out)) for k, v in figure_paths.items()},
     }
     (out / "manifest.json").write_text(json.dumps(manifest, indent=2))
