@@ -58,7 +58,7 @@ SELF_TEST_CASES = [
     ('Dibalik kata "udah gak usah dibahas" ada rasa kecewa yang paling dalam.', 0.0006),
 ]
 
-_state: dict[str, Any] = {"model": None, "tokenizer": None, "audit": {}}
+_state: dict[str, Any] = {"model": None, "tokenizer": None, "audit": {}, "error": None}
 
 
 def load_audit() -> dict:
@@ -81,14 +81,32 @@ def load_audit() -> dict:
 
 
 def load_model() -> None:
-    from transformers import AutoModelForSequenceClassification, AutoTokenizer
+    """Load weights if both the stack and the checkpoint are present; never raise.
+
+    A missing ``transformers`` install, a corrupt checkpoint, or an absent weights
+    directory must leave the service up and honest: ``/health`` says why, and
+    ``/predict`` returns 503 instead of inventing a score. That is what lets the
+    HTTP contract be tested in a CI container without the 2 GB deep-learning stack.
+    """
+    _state["model"] = None
+    _state["tokenizer"] = None
+    _state["error"] = None
+    try:
+        from transformers import AutoModelForSequenceClassification, AutoTokenizer
+    except Exception as exc:  # ImportError, or a broken torch/CUDA install
+        _state["error"] = f"{type(exc).__name__}: {exc}"
+        return
 
     if not (MODEL_DIR / "config.json").exists():
-        _state["model"] = None
+        _state["error"] = f"no config.json under {MODEL_DIR}"
         return
-    tokenizer = AutoTokenizer.from_pretrained(str(MODEL_DIR))
-    model = AutoModelForSequenceClassification.from_pretrained(str(MODEL_DIR))
-    model.eval()
+    try:
+        tokenizer = AutoTokenizer.from_pretrained(str(MODEL_DIR))
+        model = AutoModelForSequenceClassification.from_pretrained(str(MODEL_DIR))
+        model.eval()
+    except Exception as exc:
+        _state["error"] = f"{type(exc).__name__}: {exc}"
+        return
     _state["tokenizer"] = tokenizer
     _state["model"] = model
 
@@ -151,6 +169,7 @@ def health() -> dict:
         "model_loaded": _state["model"] is not None,
         "model_dir": str(MODEL_DIR),
         "audit_loaded": bool(_state.get("audit")),
+        "load_error": _state.get("error"),
     }
 
 
@@ -159,7 +178,10 @@ def predict_endpoint(request: PredictRequest) -> dict:
     if _state["model"] is None:
         raise HTTPException(
             status_code=503,
-            detail=f"model weights not found at {MODEL_DIR}. Mount them or set MODEL_DIR.",
+            detail=(
+                f"model not loaded ({_state.get('error') or 'weights absent'}). "
+                f"Mount weights under {MODEL_DIR} or set MODEL_DIR."
+            ),
         )
     probability = predict(request.text)
     return {
