@@ -1,0 +1,27 @@
+[project]
+name = "si-eval"
+version = "0.1.0"
+description = "Reproducible re-evaluation of the Indonesian suicide-ideation classifiers: duplicate leakage, baselines, uncertainty, calibration and selective prediction."
+requires-python = ">=3.10"
+dependencies = [
+    "numpy>=1.26",
+    "pandas>=2.2",
+    "scikit-learn>=1.5",
+    "scipy>=1.11",
+    "matplotlib>=3.8",
+    "openpyxl>=3.1",
+]
+
+[dependency-groups]
+dev = ["pytest>=8.0"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["si_eval"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

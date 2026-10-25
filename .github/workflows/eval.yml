@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  eval:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Sync evaluation environment
+        run: uv sync --project eval
+
+      - name: Metric and split tests
+        run: uv run --project eval pytest eval/tests -q
+
+      - name: End-to-end smoke run (no bootstrap)
+        run: uv run --project eval python -m si_eval.run --quick --out-dir "$RUNNER_TEMP/eval-out"
+
+      - name: Check the smoke run reproduced the published split
+        run: |
+          python - <<'PY'
+          import json, glob
+          path = sorted(glob.glob(f"{__import__('os').environ['RUNNER_TEMP']}/eval-out/*/results.json"))[-1]
+          r = json.load(open(path))
+          s = r["split"]
+          assert s["n_train"] == 8102 and s["n_val"] == 2026, s
+          assert s["val_positives"] == 392, s
+          assert 700 < s["val_rows_duplicated_in_train"] < 780, s
+          print("split reproduced:", s["n_train"], s["n_val"], s["val_rows_duplicated_in_train"])
+          PY
+
+      - name: Upload run artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: eval-run
+          path: ${{ runner.temp }}/eval-out
+          if-no-files-found: warn

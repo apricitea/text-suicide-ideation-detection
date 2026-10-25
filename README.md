@@ -1,107 +1,150 @@
-# Suicide Ideation Detection — FastText+LSTM (thesis) vs. Fine-Tuned IndoBERT
+# Indonesian suicide-ideation classification — thesis model, transformer follow-up, and a leakage audit
 
+[![CI](https://github.com/apricitea/text-suicide-ideation-detection/actions/workflows/eval.yml/badge.svg)](https://github.com/apricitea/text-suicide-ideation-detection/actions/workflows/eval.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Hugging Face Space](https://img.shields.io/badge/demo-HuggingFace-yellow.svg)](https://huggingface.co/spaces/apricitea/suicide-detection)
+[![Demo](https://img.shields.io/badge/demo-HuggingFace-yellow.svg)](https://huggingface.co/spaces/apricitea/suicide-detection)
+[![Paper](https://img.shields.io/badge/paper-PDF-b31b1b.svg)](paper/main.pdf)
 
-Originally my undergraduate thesis (FastText embeddings + LSTM). A deployed
-version of that model is on [HuggingFace](https://huggingface.co/apricitea); full write-up
-of the process is on [Medium](https://medium.com/@apricitea). Since then I added a
-transformer baseline (fine-tuned IndoBERT) on the exact same train/val split, to see how
-much a pretrained language model buys over word embeddings + a small recurrent net.
+An Indonesian-language text classifier for suicide-ideation content, built first as an
+undergraduate thesis (FastText embeddings + LSTM) and later extended with a fine-tuned IndoBERT on
+the same split. This repository now also contains a **re-evaluation of both results**, because the
+original comparison turned out to be inflated by duplicate rows.
 
-This is a research/educational project on Indonesian-language text classification, not a
-clinical or diagnostic tool — model outputs should not be treated as a substitute for
-professional mental health assessment.
+Research and educational work. **Not a clinical or diagnostic tool** — model outputs must not be
+substituted for professional mental-health assessment.
 
-## Results
+---
 
-Both trained and evaluated on the same 80/20 split (`random_state=1`) of the 10,128-tweet
-dataset, binary label (suicide ideation present / not), no class-imbalance treatment.
+## The finding
 
-| Model | Precision (positive) | Recall (positive) | F1 (positive) | Accuracy |
-|---|---|---|---|---|
-| FastText + LSTM (original thesis) | 0.74 | 0.85 | 0.79 | 0.91 |
-| Fine-tuned IndoBERT (`indobenchmark/indobert-base-p1`) | 0.91 | 0.90 | **0.90** | 0.96 |
+The corpus is a scraped X sample. Of 10,128 posts, 2,161 are exact duplicates, and the 80/20 split
+was drawn at random without deduplicating first. The consequence:
 
-The transformer's contextual embeddings resolve a lot of what static FastText vectors
-miss — sarcasm, negation, and multi-word idiomatic expressions common in Indonesian social
-media text. The original thesis also tried class-weighting and ADASYN oversampling to
-handle the 8:2 class imbalance; both *reduced* F1 relative to no treatment (better recall,
-much worse precision) — see `main/lstm.ipynb`. IndoBERT wasn't given any imbalance
-treatment either, and didn't need it.
+**739 of the 2,026 validation posts (36.5%) also appear, near-verbatim, in the training half.**
 
-Fine-tuned IndoBERT weights aren't committed to git (too large). They are
-published on HuggingFace at
-[`apricitea/indobert-suicide-ideation`](https://huggingface.co/apricitea/indobert-suicide-ideation),
-together with `metrics.json` and the validation predictions.
+Scored only on the 1,287 genuinely unseen validation posts:
 
-`main/indobert_finetune.py` now saves the model it trains. The original version
-trained for ~35 minutes and discarded the weights, which is why the numbers above
-had no artifact behind them for so long. Re-run on this corpus it gives
-**F1 0.9098 / accuracy 0.9650** — consistent with the reported 0.90 / 0.96 but
-marginally higher, not bit-identical: the original ran a 2023-era stack on a GPU,
-this run is torch 2.14 / transformers 5.17 on CPU. The committed run is a CPU run
-— 4 threads, no GPU, ~2 hours.
+| Model | Reported on the published split | Re-evaluated on unseen rows (95% CI) |
+|---|---|---|
+| Fine-tuned IndoBERT | F1 **0.910** / acc 0.965 | F1 **0.877** [0.845, 0.904] / acc 0.950 |
+| TF-IDF char 3–5-grams + logistic regression | — | F1 0.787 [0.744, 0.827] / acc 0.923 |
+| TF-IDF word 1–2-grams + logistic regression | — | F1 0.766 [0.722, 0.807] / acc 0.915 |
+| Count n-grams + ComplementNB | — | F1 0.762 [0.727, 0.796] / acc 0.895 |
+| FastText + LSTM (thesis) | F1 0.79 / acc 0.91 | **not reproducible — see limitation 2** |
+
+- The transformer is still the better model: **+0.090 F1** over the strongest cheap baseline,
+  95% CI [+0.049, +0.131], McNemar p = 6.3 × 10⁻⁴. The published gap overstated it.
+- Its probabilities are close to honest in aggregate: mean predicted 0.206 against an observed
+  positive rate of 0.201, ECE 0.046, Brier 0.046. That makes an operating point meaningful.
+- **Operating point (what deployment actually costs):** to catch 90% of ideation-positive posts
+  you must review **21.8% of the corpus at 83.6% precision**. At 80% recall: 17.6% reviewed,
+  92.0% precision.
+
+Full write-up: [`paper/main.pdf`](paper/main.pdf) · generated report and run manifest:
+[`eval/out/`](eval/out) · evaluation code: [`eval/`](eval).
+
+![Positive-class F1 by protocol](eval/out/20261025-full/fig_scores.png)
+
+![Duplicate leakage in the published validation split](eval/out/20261025-full/fig_leakage.png)
+
+---
 
 ## Reproducing it
 
-Dependencies are managed with Poetry. Twitter's free Developer API no longer supports
-querying historical tweets, so `dataset/final_dataset.xlsx` is included directly instead
-of a live crawl.
+The evaluation has its own dependency set — no TensorFlow, no torch:
 
 ```bash
-poetry install --with transformer  # only needed for main/indobert_finetune.py
+uv sync --project eval
+uv run --project eval python -m si_eval.run          # full run, 2,000 bootstrap resamples
+uv run --project eval pytest eval/tests -q           # metric and split tests
+```
+
+A run writes `results.json`, `manifest.json` (corpus SHA-256, git revision, package versions), five
+figures and a generated `REPORT.md` under `eval/out/<run-id>/`. The committed run is
+`20261025-full`. `--quick` skips the bootstrap intervals and finishes in seconds; CI runs that
+path on every push.
+
+To retrain the transformer (needs the `transformer` dependency group):
+
+```bash
+poetry install --with transformer
 cd main && poetry run python indobert_finetune.py
 ```
 
-Python floor is `>=3.10` for current dependency versions. `cyhunspell` (used only in the Hunspell
-arm of the stemming comparison) has no wheels past Python 3.9, so it's split into its own
-optional `hunspell` group — install it separately under a 3.9 interpreter if you need that
-specific comparison arm; everything else works on 3.10/3.11.
+That script saves the weights, the tokenizer and per-row validation predictions. The original
+thesis run did not, which is why the FastText + LSTM arm cannot be recomputed here.
 
-## Repository contents
+---
 
-- `dataset/` — the final dataset used to train the deployed model
-- `hunspell-id-main/` — tools for building a Hunspell stemmer and stopword-removal
-  function
-- `main/` — the pipeline: (1) Twitter data crawling (`twitter_crawl_data.ipynb`),
-  (2) comparing three stemming/stopword-removal tools (Sastrawi, Hunspell, Stanza),
-  (3) preprocessing, word clouds, loading the embedding matrix, model training, and
-  metric evaluation across scenarios (`lstm.ipynb`), (4) the IndoBERT comparison
-  (`indobert_finetune.py`)
+## What is in the repository
 
-**Not included**: pre-trained FastText word vectors for Indonesian — download them from
-[fastText's crawl vectors](https://fasttext.cc/docs/en/crawl-vectors.html) (search for
-"Indonesian" and grab the `.bin` file).
+| Path | Contents |
+|---|---|
+| `eval/` | The re-evaluation: leakage measurement, four classical baselines, bootstrap intervals, McNemar tests, calibration, selective prediction, error buckets, tests, CI |
+| `paper/` | LaTeX write-up of the audit and its results (6 pages, compiled PDF committed) |
+| `main/` | Original pipeline: tweet crawling, stemming/stopword comparison (Sastrawi, Hunspell, Stanza), LSTM notebook, IndoBERT fine-tuning script, workbook pseudonymiser |
+| `dataset/` | The final labelled dataset used for the reported models |
+| `release/` | Pseudonymised 10k JSONL release + manifest (built by `main/build_public_release.py`) |
+| `indobert_publish/` | Committed IndoBERT metrics and per-row validation predictions (weights live on HuggingFace) |
+| `hf/` | Dataset and model cards, upload script |
+| `hunspell-id-main/` | Indonesian Hunspell dictionary used in the stemming comparison |
+
+Fine-tuned IndoBERT weights are published at
+[`apricitea/indobert-suicide-ideation`](https://huggingface.co/apricitea/indobert-suicide-ideation);
+the demo is the [HuggingFace Space](https://huggingface.co/spaces/apricitea/suicide-detection).
+Pre-trained Indonesian FastText vectors are **not** included: download `cc.id.300.bin` from
+[fastText's crawl vectors](https://fasttext.cc/docs/en/crawl-vectors.html) if you want to re-run
+the LSTM notebook.
+
+Python floor is `>=3.10`. `cyhunspell` (used only in the Hunspell arm of the stemming comparison)
+has no wheels past Python 3.9, so it lives in its own optional `hunspell` group — install it
+separately under a 3.9 interpreter if you need that comparison.
+
+---
+
+## Limitations
+
+1. **IndoBERT was not retrained on a deduplicated split.** Its weights saw the leaked twins, so
+   the 0.877 estimate is, if anything, optimistic. A fully clean protocol requires retraining.
+2. **The FastText + LSTM thesis arm cannot be re-run.** Its FastText vectors are not in the
+   repository and the Keras tokenizer was never saved with the model, so no per-row predictions
+   exist. The 0.79 figure is quoted from the thesis, not recomputed. That is a reproducibility
+   defect in the original work, recorded rather than hidden.
+3. **One split, one seed.** Repeated splits would widen the intervals and could reorder the two
+   strongest baselines.
+4. **Labels are single-annotator.** No inter-annotator agreement study exists, so the label
+   ceiling — and therefore how much a 0.09 F1 difference means — is unknown.
+5. **The leakage rate is corpus-specific.** The method transfers to other scraped corpora; the
+   36.5% does not.
 
 ---
 
 ## Data provenance
 
-`dataset/final_dataset.xlsx` is a corpus of Indonesian-language posts collected from
-X (Twitter) through the public API and labelled for suicide-ideation content. The file is
-committed because Twitter's free developer API no longer permits historical queries, so
-the training data cannot be re-fetched for reproducibility.
+`dataset/final_dataset.xlsx` is a corpus of Indonesian-language posts collected from X (Twitter)
+through the public API and labelled for suicide-ideation content. The file is committed because
+Twitter's free developer API no longer permits historical queries, so the training data cannot be
+re-fetched for reproducibility.
 
-The post text is third-party user-generated content. It is **not our work**, we assert no
-licence over it, and it is included here for research reproducibility only. The labels,
-preprocessing pipeline and models in this repository are our own work, released under the
-MIT licence in `LICENSE`.
+The post text is third-party user-generated content. It is **not our work**, we assert no licence
+over it, and it is included here for research reproducibility only. The labels, preprocessing
+pipeline and models in this repository are our own work, released under the MIT licence in
+`LICENSE`.
 
 ### Identifiers in the corpus were pseudonymised
 
-The corpus originally carried live account names. Measured across all six sheets of the
-workbook, there were 27,559 `@handle` occurrences covering 7,602 distinct accounts; in the
-`10k` training sheet alone, 4,318 of 10,128 rows contained a handle and **296 of those rows
-carried the positive (ideation) label.** An account name next to a mental-health label is
-identifiable personal data, so before publishing the workbook every handle was replaced
-with a stable pseudonym (`@user_` + 8 hex characters of `sha256(salt ‖ handle)`), and
-`twitter.com/<user>/status/<id>` URLs were rewritten to their id-only form.
+The corpus originally carried live account names. Measured across all six sheets of the workbook:
+27,559 `@handle` occurrences covering 7,602 distinct accounts; in the `10k` training sheet alone,
+4,318 of 10,128 rows contained a handle and **296 of those rows carried the positive (ideation)
+label.** An account name next to a mental-health label is identifiable personal data, so before
+publishing the workbook every handle was replaced with a stable pseudonym
+(`@user_` + 8 hex characters of `sha256(salt ‖ handle)`), and `twitter.com/<user>/status/<id>` URLs
+were rewritten to their id-only form.
 
-Text and labels are otherwise unchanged, so this file is still the corpus the reported
-metrics were computed from, apart from the handle substitution. The salt and the
-handle → pseudonym map are kept out of the repository (`private/`, gitignored), so the
-mapping is reversible for us and not for a reader.
+Text and labels are otherwise unchanged, so this file is still the corpus the reported metrics were
+computed from, apart from the handle substitution. The salt and the handle → pseudonym map are kept
+out of the repository (`private/`, gitignored), so the mapping is reversible for us and not for a
+reader.
 
 Reproduce or verify it with:
 
@@ -114,11 +157,23 @@ The transform verifies its own output and refuses to write if any handle survive
 
 Two things were deliberately left alone:
 
-- **Emoji mojibake.** The workbook mis-decoded UTF-8 as cp1252, so emoji are stored as
-  sequences like `ðŸ˜”`. 1,450 rows in the `10k` sheet are affected. A repair exists in
-  `main/build_public_release.py --repair-mojibake` but is off by default, so that this
-  file matches the metrics reported below.
-- **Three corporate email addresses** appearing inside post text
-  (`info@careerbridge.coach`, `help@dana.id`). These are business support addresses, not
-  personal accounts, and the handle transform does not touch text preceded by a word
-  character.
+- **Emoji mojibake.** The workbook mis-decoded UTF-8 as cp1252, so emoji are stored as sequences
+  like `ðŸ˜”`. 1,450 rows in the `10k` sheet are affected. A repair exists in
+  `main/build_public_release.py --repair-mojibake` but is off by default, so this file matches the
+  metrics reported above.
+- **Three corporate email addresses** appearing inside post text (`info@careerbridge.coach`,
+  `help@dana.id`). These are business support addresses, not personal accounts, and the handle
+  transform does not touch text preceded by a word character.
+
+---
+
+## Citation
+
+```bibtex
+@misc{nataputra2026leakage,
+  title  = {What a 0.91 F1 Actually Measures: Duplicate Leakage in a Scraped Indonesian Mental-Health Corpus},
+  author = {Nataputra, Alvin C.},
+  year   = {2026},
+  note   = {Research note, \url{https://github.com/apricitea/text-suicide-ideation-detection}}
+}
+```

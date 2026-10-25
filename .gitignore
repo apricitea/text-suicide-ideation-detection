@@ -11,3 +11,10 @@ private/
 # fine-tuned weights: published to HuggingFace, not to git
 indobert_publish/model/
 *.safetensors
+
+# evaluation environment and LaTeX by-products
+eval/.venv/
+.pytest_cache/
+paper/*.aux
+paper/*.log
+paper/*.out
