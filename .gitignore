@@ -18,3 +18,7 @@ eval/.venv/
 paper/*.aux
 paper/*.log
 paper/*.out
+
+# protocol-C retrain: weights are large, predictions and manifest are committed
+indobert_clean_split/model/
+indobert_clean_split/_checkpoints/

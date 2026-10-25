@@ -1,0 +1,31 @@
+{
+  "dataset": {
+    "path": "/home/vlain/workspaces/personal/text-suicide-ideation-detection/dataset/final_dataset.xlsx",
+    "sha256": "d3fa337259d3595e317a954f48765bd675ce580d2d37ce1687b4d41bacb536de",
+    "sheet": "10k"
+  },
+  "git": {
+    "commit": "c71155c5e588cfb83756f4975f5fc0892a71b157",
+    "dirty": true
+  },
+  "versions": {
+    "python": "3.11.15",
+    "torch": "2.14.0+cu130",
+    "transformers": "5.17.0",
+    "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43"
+  },
+  "config": {
+    "seed": 1,
+    "epochs": 3.0,
+    "batch_size": 16,
+    "max_length": 128,
+    "limit": 0,
+    "max_steps": -1
+  },
+  "split": {
+    "n_train": 6340,
+    "n_val": 1586,
+    "n_val_positives": 311,
+    "cross_split_duplicates": 0
+  }
+}

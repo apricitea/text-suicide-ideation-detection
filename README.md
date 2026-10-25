@@ -23,23 +23,29 @@ was drawn at random without deduplicating first. The consequence:
 
 **739 of the 2,026 validation posts (36.5%) also appear, near-verbatim, in the training half.**
 
-Scored only on the 1,287 genuinely unseen validation posts:
+Three protocols, same corpus, in increasing order of cleanliness:
 
-| Model | Reported on the published split | Re-evaluated on unseen rows (95% CI) |
-|---|---|---|
-| Fine-tuned IndoBERT | F1 **0.910** / acc 0.965 | F1 **0.877** [0.845, 0.904] / acc 0.950 |
-| TF-IDF char 3–5-grams + logistic regression | — | F1 0.787 [0.744, 0.827] / acc 0.923 |
-| TF-IDF word 1–2-grams + logistic regression | — | F1 0.766 [0.722, 0.807] / acc 0.915 |
-| Count n-grams + ComplementNB | — | F1 0.762 [0.727, 0.796] / acc 0.895 |
-| FastText + LSTM (thesis) | F1 0.79 / acc 0.91 | **not reproducible — see limitation 2** |
+| Protocol | Validation rows | IndoBERT positive F1 | Strongest cheap baseline |
+|---|---|---|---|
+| **A. Published split, as reported** | 2,026 | **0.910** | — |
+| **B. Same weights, unseen rows only** | 1,287 | **0.877** [0.845, 0.904] | 0.787 [0.744, 0.827] (char n-grams) |
+| **C. Fully clean: dedupe, re-split, retrain** | 1,586 | **0.849** [0.821, 0.877] | 0.785 [0.749, 0.819] (word n-grams) |
 
-- The transformer is still the better model: **+0.090 F1** over the strongest cheap baseline,
-  95% CI [+0.049, +0.131], McNemar p = 6.3 × 10⁻⁴. The published gap overstated it.
-- Its probabilities are close to honest in aggregate: mean predicted 0.206 against an observed
+- **A → B** is what the duplicate overlap was worth: 3.3 F1 points of the published number came
+  from rows the model had already seen.
+- **B → C** is what the leaked twins were worth to the *weights*: retraining on a deduplicated
+  corpus costs another 2.8 points, on a smaller training set (6,340 rows instead of 8,102).
+- Under the clean protocol the transformer's advantage over a linear model is
+  **+0.064 F1** [+0.029, +0.105], McNemar p = 0.015 — smaller than the +0.090 visible on
+  unseen rows of the leaky split, and smaller again than the 0.11 the published pair implied.
+  The direction survives; the size does not.
+- Baselines also reorder between protocols (word n-grams overtake character n-grams under C),
+  which is a reminder that a 0.01 gap between baselines is not a finding.
+- Some probabilities are close to honest in aggregate: mean predicted 0.206 against an observed
   positive rate of 0.201, ECE 0.046, Brier 0.046. That makes an operating point meaningful.
 - **Operating point (what deployment actually costs):** to catch 90% of ideation-positive posts
   you must review **21.8% of the corpus at 83.6% precision**. At 80% recall: 17.6% reviewed,
-  92.0% precision.
+  92.0% precision. These come from protocol B; protocol C is not recalibrated yet.
 
 Full write-up: [`paper/main.pdf`](paper/main.pdf) · generated report and run manifest:
 [`eval/out/`](eval/out) · evaluation code: [`eval/`](eval).
@@ -65,7 +71,20 @@ figures and a generated `REPORT.md` under `eval/out/<run-id>/`. The committed ru
 `20261025-full`. `--quick` skips the bootstrap intervals and finishes in seconds; CI runs that
 path on every push.
 
-To retrain the transformer (needs the `transformer` dependency group):
+Protocol C is reproducible end to end, with a manifest recording the corpus hash, git revision and
+library versions:
+
+```bash
+.venv/bin/python main/train_clean_split.py --out-dir indobert_clean_split   # ~110 min on 4 CPU threads
+uv run --project eval python eval/compare_clean_retrain.py \
+    --predictions indobert_clean_split/predictions.csv
+```
+
+The retrain writes `metrics.json`, `manifest.json` and per-row `predictions.csv`; the comparison
+trains each baseline on the same deduplicated split and writes
+`eval/out/clean-retrain-comparison/COMPARISON.md`.
+
+To re-run the original protocol-A fine-tune (needs the `transformer` dependency group):
 
 ```bash
 poetry install --with transformer
@@ -88,6 +107,8 @@ thesis run did not, which is why the FastText + LSTM arm cannot be recomputed he
 | `release/` | Pseudonymised 10k JSONL release + manifest (built by `main/build_public_release.py`) |
 | `demo/` | FastAPI service + Dockerfile serving the audited weights; CI builds the image and checks a real prediction against the committed one |
 | `indobert_publish/` | Committed IndoBERT metrics and per-row validation predictions; weights are the `model-v1` release asset |
+| `indobert_clean_split/` | Protocol C: deduplicated-split retrain — metrics, manifest and per-row predictions (weights not committed) |
+| `eval/compare_clean_retrain.py` | Scores protocol C against baselines trained on the same deduplicated split |
 | `hf/` | Dataset and model cards, upload script |
 | `hunspell-id-main/` | Indonesian Hunspell dictionary used in the stemming comparison |
 
@@ -115,8 +136,10 @@ separately under a 3.9 interpreter if you need that comparison.
 
 ## Limitations
 
-1. **IndoBERT was not retrained on a deduplicated split.** Its weights saw the leaked twins, so
-   the 0.877 estimate is, if anything, optimistic. A fully clean protocol requires retraining.
+1. **Protocol C is a single run, one seed.** The retrain cost 6,434 s on four CPU threads and was
+   run once (seed 1). A second seed would widen the 0.849 interval and could move it by a point;
+   the interval reported is sampling uncertainty on the validation set, not run-to-run variance.
+   Protocol C also has not been recalibrated, so the operating-point table still comes from B.
 2. **The FastText + LSTM thesis arm cannot be re-run.** Its FastText vectors are not in the
    repository and the Keras tokenizer was never saved with the model, so no per-row predictions
    exist. The 0.79 figure is quoted from the thesis, not recomputed. That is a reproducibility
