@@ -57,6 +57,16 @@ torch = ">=2.10.0"
 transformers = ">=5.5.0"
 accelerate = "^0.30.0"
 
+[tool.poetry.group.demo]
+optional = true
+
+[tool.poetry.group.demo.dependencies]
+# HTTP contract tests for demo/; the real-weight path needs the `transformer` group.
+fastapi = "^0.115"
+uvicorn = {version = "^0.30", extras = ["standard"]}
+httpx = "^0.28"
+pytest = "^8.0"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"

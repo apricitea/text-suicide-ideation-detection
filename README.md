@@ -2,7 +2,8 @@
 
 [![CI](https://github.com/apricitea/text-suicide-ideation-detection/actions/workflows/eval.yml/badge.svg)](https://github.com/apricitea/text-suicide-ideation-detection/actions/workflows/eval.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Demo](https://img.shields.io/badge/demo-HuggingFace-yellow.svg)](https://huggingface.co/spaces/apricitea/suicide-detection)
+[![Weights](https://img.shields.io/badge/weights-release-blue.svg)](https://github.com/apricitea/text-suicide-ideation-detection/releases/tag/model-v1)
+[![Demo image](https://github.com/apricitea/text-suicide-ideation-detection/actions/workflows/demo-image.yml/badge.svg)](https://github.com/apricitea/text-suicide-ideation-detection/actions/workflows/demo-image.yml)
 [![Paper](https://img.shields.io/badge/paper-PDF-b31b1b.svg)](paper/main.pdf)
 
 An Indonesian-language text classifier for suicide-ideation content, built first as an
@@ -85,13 +86,23 @@ thesis run did not, which is why the FastText + LSTM arm cannot be recomputed he
 | `main/` | Original pipeline: tweet crawling, stemming/stopword comparison (Sastrawi, Hunspell, Stanza), LSTM notebook, IndoBERT fine-tuning script, workbook pseudonymiser |
 | `dataset/` | The final labelled dataset used for the reported models |
 | `release/` | Pseudonymised 10k JSONL release + manifest (built by `main/build_public_release.py`) |
-| `indobert_publish/` | Committed IndoBERT metrics and per-row validation predictions (weights live on HuggingFace) |
+| `demo/` | FastAPI service + Dockerfile serving the audited weights; CI builds the image and checks a real prediction against the committed one |
+| `indobert_publish/` | Committed IndoBERT metrics and per-row validation predictions; weights are the `model-v1` release asset |
 | `hf/` | Dataset and model cards, upload script |
 | `hunspell-id-main/` | Indonesian Hunspell dictionary used in the stemming comparison |
 
-Fine-tuned IndoBERT weights are published at
-[`apricitea/indobert-suicide-ideation`](https://huggingface.co/apricitea/indobert-suicide-ideation);
-the demo is the [HuggingFace Space](https://huggingface.co/spaces/apricitea/suicide-detection).
+The fine-tuned weights are **not** on HuggingFace: the previously advertised
+`apricitea/indobert-suicide-ideation` repository does not exist (the URL returns 401), so that
+claim has been removed from this README, the profile and the CV. They are published as a GitHub
+release asset instead — [`model-v1`](https://github.com/apricitea/text-suicide-ideation-detection/releases/tag/model-v1),
+461,903,383 bytes, SHA-256 `fe65a0ea18a5f67569f347c4a84de070d9f8ca49cdacca1b8f66ac6c11cbff76`.
+`demo/` serves them and verifies that checksum at build time; `hf/publish.py` will upload to the
+Hub instead if you supply a token.
+
+The old Streamlit Space at `apricitea/suicide-detection` is a 2023 LSTM app. It serves models
+trained on the leaky split and it currently fails to schedule
+(`RUNTIME_ERROR: not enough hardware capacity`), so it is no longer linked as the demo.
+
 Pre-trained Indonesian FastText vectors are **not** included: download `cc.id.300.bin` from
 [fastText's crawl vectors](https://fasttext.cc/docs/en/crawl-vectors.html) if you want to re-run
 the LSTM notebook.
