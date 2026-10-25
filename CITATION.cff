@@ -1,0 +1,16 @@
+cff-version: 1.2.0
+message: "If you use this work, cite it as below."
+type: software
+title: "What a 0.91 F1 Actually Measures: Duplicate Leakage in a Scraped Indonesian Mental-Health Corpus"
+authors:
+  - family-names: Nataputra
+    given-names: Alvin Christian
+    email: alvincnataputra@gmail.com
+    website: https://apricitea.github.io
+repository-code: "https://github.com/apricitea/text-suicide-ideation-detection"
+url: "https://apricitea.github.io"
+license: MIT
+version: "1.0.0"
+date-released: "2026-10-25"
+abstract: >-
+  A re-evaluation of an Indonesian suicide-ideation classifier. 739 of 2,026 validation posts (36.5%) are near-duplicates of a training row; on the 1,287 unseen rows fine-tuned IndoBERT reaches positive-class F1 0.877 [0.845, 0.904] and the remaining advantage over a character n-gram baseline is +0.090 [+0.049, +0.131].
