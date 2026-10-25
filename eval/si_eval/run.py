@@ -239,10 +239,12 @@ model failed.
 
 ## 6. Limitations
 
-1. **IndoBERT is not retrained on a deduplicated split.** Its weights saw the leaked
-   twins. Scoring it only on rows with no training twin removes the direct duplicate
-   overlap, but not the indirect effect of having memorised near-identical text. A
-   fully clean protocol requires retraining, which is a documented next step, not a claim.
+1. **This report scores weights that saw the leaked twins.** Removing duplicate rows from
+   the evaluation removes the direct overlap, not the advantage those rows gave the model
+   during training. The fully clean protocol --- deduplicate, re-split, retrain --- is
+   reported in `eval/out/clean-retrain-comparison/`: positive F1 0.849 [0.821, 0.877]
+   against 0.785 for the strongest baseline. The intervals here are therefore optimistic
+   relative to that protocol.
 2. **The FastText + LSTM thesis arm cannot be re-run.** Its FastText vectors are not in
    the repository and the Keras tokenizer was never saved with the model, so its
    per-row predictions do not exist. The 0.79 F1 is therefore quoted from the thesis,
