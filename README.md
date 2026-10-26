@@ -80,6 +80,23 @@ uv run --project eval python eval/compare_clean_retrain.py \
     --predictions indobert_clean_split/predictions.csv
 ```
 
+Checking the 0.849 result **without** spending 6,434 seconds on a retrain: the Protocol C
+weights are a release asset, and a verification script recomputes the metric from the committed
+validation texts.
+
+```bash
+curl -L -o /tmp/clean.tar.gz https://github.com/apricitea/text-suicide-ideation-detection/releases/download/model-clean-v1/indobert-clean-split-model.tar.gz
+mkdir -p indobert_clean_split/model
+tar -xzf /tmp/clean.tar.gz -C indobert_clean_split/model --strip-components=1
+.venv/bin/python eval/verify_clean_retrain.py \
+    --weights indobert_clean_split/model --predictions indobert_clean_split/predictions.csv
+```
+
+Archive: 461,902,868 bytes, SHA-256 `b34525c3d4d222d1c3a99990e29d62ba553533c13b8a157a6ac4a288947d17d0`.
+The script fails if the recomputed F1 differs from `metrics.json` by more than 0.005. Verified
+here: recomputed 0.8490, committed 0.8490, row-level agreement with the committed predictions
+1.0000. Inference over 1,586 posts takes well under a minute on CPU.
+
 The retrain writes `metrics.json`, `manifest.json` and per-row `predictions.csv`; the comparison
 trains each baseline on the same deduplicated split and writes
 `eval/out/clean-retrain-comparison/COMPARISON.md`.
