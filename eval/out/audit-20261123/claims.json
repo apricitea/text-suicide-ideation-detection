@@ -1,0 +1,320 @@
+{
+  "run_id": "audit-20261123",
+  "checks": [
+    {
+      "claim": "dataset.rows",
+      "recomputed": 10128,
+      "published": 10128,
+      "match": true,
+      "note": ""
+    },
+    {
+      "claim": "dataset.positives",
+      "recomputed": 1967,
+      "published": 1967,
+      "match": true,
+      "note": ""
+    },
+    {
+      "claim": "dataset.exact_duplicate_rows",
+      "recomputed": 2161,
+      "published": 2161,
+      "match": true,
+      "note": ""
+    },
+    {
+      "claim": "dataset.duplicate_rows_normalised",
+      "recomputed": 2202,
+      "published": 2202,
+      "match": true,
+      "note": ""
+    },
+    {
+      "claim": "dataset.unique_normalised_texts",
+      "recomputed": 7926,
+      "published": 7926,
+      "match": true,
+      "note": ""
+    },
+    {
+      "claim": "split.n_train",
+      "recomputed": 8102,
+      "published": 8102,
+      "match": true,
+      "note": ""
+    },
+    {
+      "claim": "split.n_val",
+      "recomputed": 2026,
+      "published": 2026,
+      "match": true,
+      "note": ""
+    },
+    {
+      "claim": "split.val_positives",
+      "recomputed": 392,
+      "published": 392,
+      "match": true,
+      "note": ""
+    },
+    {
+      "claim": "split.val_rows_duplicated_in_train",
+      "recomputed": 739,
+      "published": 739,
+      "match": true,
+      "note": ""
+    },
+    {
+      "claim": "split.val_leaked_fraction",
+      "recomputed": 0.364758,
+      "published": 0.3647581441263574,
+      "match": true,
+      "note": ""
+    },
+    {
+      "claim": "split.n_clean_val",
+      "recomputed": 1287,
+      "published": 1287,
+      "match": true,
+      "note": ""
+    },
+    {
+      "claim": "split.clean_val_positives",
+      "recomputed": 259,
+      "published": 259,
+      "match": true,
+      "note": ""
+    },
+    {
+      "claim": "split.dedup_train_rows",
+      "recomputed": 6726,
+      "published": 6726,
+      "match": true,
+      "note": ""
+    },
+    {
+      "claim": "indobert.full_val.positive_f1",
+      "recomputed": 0.909784,
+      "published": 0.9097839898348158,
+      "match": true,
+      "note": ""
+    },
+    {
+      "claim": "indobert.full_val.positive_precision",
+      "recomputed": 0.9063291,
+      "published": 0.9063291139240506,
+      "match": true,
+      "note": ""
+    },
+    {
+      "claim": "indobert.full_val.positive_recall",
+      "recomputed": 0.9132653,
+      "published": 0.9132653061224489,
+      "match": true,
+      "note": ""
+    },
+    {
+      "claim": "indobert.full_val.accuracy",
+      "recomputed": 0.9649556,
+      "published": 0.9649555774925962,
+      "match": true,
+      "note": ""
+    },
+    {
+      "claim": "indobert.clean_val.positive_f1",
+      "recomputed": 0.8773946,
+      "published": 0.8773946360153256,
+      "match": true,
+      "note": ""
+    },
+    {
+      "claim": "indobert.clean_val.positive_precision",
+      "recomputed": 0.8707224,
+      "published": 0.870722433460076,
+      "match": true,
+      "note": ""
+    },
+    {
+      "claim": "indobert.clean_val.positive_recall",
+      "recomputed": 0.8841699,
+      "published": 0.8841698841698842,
+      "match": true,
+      "note": ""
+    },
+    {
+      "claim": "indobert.clean_val.accuracy",
+      "recomputed": 0.950272,
+      "published": 0.9502719502719502,
+      "match": true,
+      "note": ""
+    },
+    {
+      "claim": "indobert_clean_split.positive_f1",
+      "recomputed": 0.8489666,
+      "published": 0.8489666,
+      "match": true,
+      "note": ""
+    },
+    {
+      "claim": "protocol_C.confusion_matrix",
+      "recomputed": 0,
+      "published": 0,
+      "match": true,
+      "note": ""
+    }
+  ],
+  "corpus": {
+    "rows": 10128,
+    "positives": 1967,
+    "positive_rate": 0.194214,
+    "exact_duplicate_rows": 2161,
+    "duplicate_rows_normalised": 2202,
+    "unique_normalised_texts": 7926
+  },
+  "split": {
+    "n_train": 8102,
+    "n_val": 2026,
+    "val_positives": 392,
+    "val_rows_duplicated_in_train": 739,
+    "val_leaked_fraction": 0.364758,
+    "n_clean_val": 1287,
+    "clean_val_positives": 259,
+    "dedup_train_rows": 6726
+  },
+  "alignment": {
+    "prediction_rows": 2026,
+    "val_rows": 2026,
+    "gold_column_equals_reproduced_split": true,
+    "text_column_equals_corpus_text_rows": 1163,
+    "text_column_matches_note": "predictions.csv carries model-side text, not the corpus text"
+  },
+  "protocol_A_full_val": {
+    "n": 2026,
+    "positives": 392,
+    "confusion_matrix": [
+      [
+        1597,
+        37
+      ],
+      [
+        34,
+        358
+      ]
+    ],
+    "positive_f1": 0.909784,
+    "positive_precision": 0.9063291,
+    "positive_recall": 0.9132653,
+    "accuracy": 0.9649556,
+    "mean_prob_positive": 0.1961,
+    "observed_positive_rate": 0.1935
+  },
+  "protocol_B_clean_val": {
+    "n": 1287,
+    "positives": 259,
+    "confusion_matrix": [
+      [
+        994,
+        34
+      ],
+      [
+        30,
+        229
+      ]
+    ],
+    "positive_f1": 0.8773946,
+    "positive_precision": 0.8707224,
+    "positive_recall": 0.8841699,
+    "accuracy": 0.950272,
+    "mean_prob_positive": 0.2056,
+    "observed_positive_rate": 0.2012
+  },
+  "protocol_C_committed": {
+    "n": 1586,
+    "positives": 311,
+    "confusion_matrix": [
+      [
+        1224,
+        51
+      ],
+      [
+        44,
+        267
+      ]
+    ],
+    "positive_f1": 0.8489666,
+    "positive_precision": 0.8396226,
+    "positive_recall": 0.8585209,
+    "accuracy": 0.9401009,
+    "mean_prob_positive": 0.2002,
+    "observed_positive_rate": 0.1961
+  },
+  "operating_points_protocol_B": [
+    {
+      "target_recall": 0.9,
+      "recall_achieved": 0.9035,
+      "fraction_reviewed": 0.2176,
+      "precision_at_cut": 0.8357
+    },
+    {
+      "target_recall": 0.8,
+      "recall_achieved": 0.8031,
+      "fraction_reviewed": 0.1756,
+      "precision_at_cut": 0.9204
+    }
+  ],
+  "calibration_protocol_B": {
+    "ece": 0.04559,
+    "brier": 0.04622,
+    "mean_prob_positive": 0.2056,
+    "observed_positive_rate": 0.2012
+  },
+  "annotation": {
+    "rows_with_three_labels": 10127,
+    "unanimous_rows": 9751,
+    "split_rows": 376,
+    "unanimous_share": 0.9629,
+    "pairwise": {
+      "ACN-BME": {
+        "cohens_kappa": 0.9391,
+        "percent_agreement": 0.9805
+      },
+      "ACN-AIP": {
+        "cohens_kappa": 0.9437,
+        "percent_agreement": 0.982
+      },
+      "BME-AIP": {
+        "cohens_kappa": 0.8868,
+        "percent_agreement": 0.9632
+      }
+    },
+    "fleiss_kappa": 0.9229,
+    "published_label_equals_coder_majority_rows": 10127,
+    "published_label_equals_coder_majority_share": 1.0,
+    "row_alignment_10k_vs_current_data": 10128
+  },
+  "errors_vs_disagreement": {
+    "clean_val_rows": 1287,
+    "rows_joined_to_current_data": 2026,
+    "clean_val_rows_coders_disagree": 55,
+    "clean_val_model_errors": 64,
+    "errors_on_disagreed_rows": 1,
+    "errors_on_unanimous_rows": 63
+  },
+  "unused_sheets": {
+    "800labeled": {
+      "rows": 820
+    },
+    "8k_labeled": {
+      "rows": 10128
+    },
+    "11k_unlabeled": {
+      "rows": 11023
+    }
+  },
+  "summary": {
+    "checks": 23,
+    "matched": 23,
+    "mismatched": [],
+    "verdict": "all published numbers reproduce"
+  }
+}
