@@ -105,8 +105,14 @@ print(probs[1].item())  # P(ideation)
 
 ## Limitations
 
-- **Single annotator, no inter-annotator agreement.** Some label noise is
-  certain; idiom, sarcasm and quoted song lyrics are the hardest cases.
+- **Labels are a three-coder majority, not gold.** The corpus carries three independent coder
+  columns (`ACN`, `BME`, `AIP`) and the label is their majority vote; agreement is 96.3%
+  unanimous, 376 rows split 2-1, Fleiss kappa 0.923 (m=3). Some label noise remains, but it is
+  not the binding constraint: the model's clean-validation errors sit on rows all three coders
+  agreed about in 60 of 64 cases. Idiom, sarcasm and quoted song lyrics are the hardest cases.
+- **Pseudonymous, not anonymous.** The collected account's handle was replaced; mentions of other
+  users and links inside the post text were not (4,320 and 1,600 of 10,128 rows). Treat the input
+  text as sensitive.
 - **Indonesian social-media register only**, collected in 2023. Expect
   degradation on formal Indonesian, other languages, and clinical text.
 - **Emoji in the training corpus are mangled** (a cp1252 mis-decode in the

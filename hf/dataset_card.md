@@ -112,8 +112,11 @@ on the GitHub repository.
 - **Pseudonymisation is not anonymisation.** Post text can still identify
   someone (self-disclosure, rare phrasing, quoted content), and the labels
   concern mental health. Treat the file as sensitive.
-- Single annotator, no inter-annotator agreement. Idiom, sarcasm and quoted
-  lyrics are the hardest cases; some label noise is certain.
+- Labels are a **three-coder majority**, not gold: agreement is 96.3% unanimous, 376 rows split
+  2-1, Fleiss kappa 0.923 (m=3). Idiom, sarcasm and quoted lyrics are the hardest cases; some
+  label noise is certain.
+- **Pseudonymous, not anonymous.** The collected account's handle was replaced, but mentions of
+  other users and links inside the post text were not (4,320 and 1,600 of 10,128 rows).
 - Indonesian social-media register only. Do not expect transfer to formal
   Indonesian, other languages, or clinical text.
 - 2023 collection window; platform vocabulary drifts.

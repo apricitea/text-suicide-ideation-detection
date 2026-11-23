@@ -163,10 +163,22 @@ separately under a 3.9 interpreter if you need that comparison.
    defect in the original work, recorded rather than hidden.
 3. **One split, one seed.** Repeated splits would widen the intervals and could reorder the two
    strongest baselines.
-4. **Labels are single-annotator.** No inter-annotator agreement study exists, so the label
-   ceiling — and therefore how much a 0.09 F1 difference means — is unknown.
+4. **Labels are a three-coder majority, with measured agreement.** The corpus carries three
+   independent coder columns (`ACN`, `BME`, `AIP`) in
+   `dataset/final_dataset.xlsx[sheet=current_data]`, and the published `label` is their majority
+   vote on all 10,127 fully-labelled rows. Agreement is 96.29% unanimous, with 376 rows (3.7%)
+   split 2-1 and pairwise Cohen's kappa 0.939 / 0.944 / 0.887 (Fleiss kappa 0.923, m=3, k=2), so
+   the label ceiling is bounded but real — the 376 disputed rows are enumerated rather than
+   unknown. It is not what limits the score: in the clean validation set the model's 64 errors sit
+   on rows all three coders agreed about 60 times out of 64. Reproduce with
+   `eval/audit/recompute_claims.py`.
 5. **The leakage rate is corpus-specific.** The method transfers to other scraped corpora; the
    36.5% does not.
+6. **The committed text still carries third-party mentions and links.** Pseudonymisation replaced
+   the *collected* account's handle; it did not strip mentions of other users or URLs from the post
+   text (4,320 of 10,128 rows contain an `@mention`, 1,600 a link — in `dataset/final_dataset.xlsx`
+   and in the release file alike). Treat both as sensitive; a v2 release should strip or tokenise
+   them.
 
 ---
 

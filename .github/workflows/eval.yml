@@ -39,10 +39,15 @@ jobs:
           print("split reproduced:", s["n_train"], s["n_val"], s["val_rows_duplicated_in_train"])
           PY
 
+      - name: Recompute every published figure from committed artifacts
+        run: uv run --project eval python eval/audit/recompute_claims.py
+
       - name: Upload run artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: eval-run
-          path: ${{ runner.temp }}/eval-out
+          path: |
+            ${{ runner.temp }}/eval-out
+            eval/out/audit-20261123
           if-no-files-found: warn

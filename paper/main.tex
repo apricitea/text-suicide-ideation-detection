@@ -75,10 +75,13 @@ which is the point: the audit is cheap, and it should have been routine.
 \section{Data and the published protocol}
 
 The corpus comprises 10{,}128 Indonesian-language posts from X with a binary label for
-suicide-ideation content: 1{,}967 positive (19.4\%). Account handles were replaced with stable
-pseudonyms before publication; text and labels are otherwise unchanged. Labels are
-single-annotator, and no inter-annotator agreement study exists for this corpus
-\citep{artstein2008agreement}, which bounds how much any \fone{} difference can mean.
+suicide-ideation content: 1{,}967 positive (19.4\%). The collected account handle was replaced
+with a stable pseudonym before publication; mentions of other users and links inside the post
+text were not rewritten, so the released text is pseudonymous but not safe to treat as anonymous.
+Labels are the majority vote of three independent coders (\texttt{ACN}, \texttt{BME},
+\texttt{AIP}); 96.3\% of rows are unanimous, 376 are split 2-1, and agreement is
+$\kappa=0.923$ (Fleiss, $m=3$), which bounds the label ceiling without removing it
+\citep{artstein2008agreement}.
 
 Both published experiments call
 \texttt{train\_test\_split(train\_size=0.8, random\_state=1)} on the raw corpus, yielding 8{,}102
@@ -319,8 +322,13 @@ report an interval.
   the Keras tokenizer was not saved with the model, so its per-row predictions do not exist.
   \item \textbf{One split, one seed.} The comparison conditions on a single 80/20 draw. Repeated
   splits would widen the intervals and could reorder the two strongest baselines.
-  \item \textbf{Single-annotator labels.} The ceiling on measurable \fone{} is unknown, so a
-  0.09 difference between models may be smaller than the label noise.
+  \item \textbf{Labels are a three-coder majority, not gold.} Agreement is
+  $\kappa=0.923$ (Fleiss, $m=3$); 376 of 10{,}127 rows were split 2-1, so a bounded amount of
+  label noise remains. It is not the binding constraint here: the model's 64 clean-validation
+  errors fall on rows all three coders agreed about in 60 cases.
+  \item \textbf{Pseudonymous, not anonymous.} Pseudonymisation covered the collected account's
+  handle; mentions of other users and links inside the post text were left in place (4{,}320 and
+  1{,}600 rows respectively), so the corpus text must still be handled as sensitive.
   \item \textbf{One corpus, one language, one platform.} The leakage rate is a property of this
   crawl; the method transfers, the number does not.
 \end{enumerate}
