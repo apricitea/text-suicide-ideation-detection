@@ -1,0 +1,90 @@
+{
+  "mode": "phase1",
+  "ledger": "audit/out/relabel-v1.jsonl",
+  "rows_in_ledger": 658,
+  "rows_selected": 658,
+  "rows_joined": 658,
+  "models": [
+    "deepseek/deepseek-v4.1-flash-1017"
+  ],
+  "prompt_versions": [
+    "01d25055c81b"
+  ],
+  "undecidable": 0,
+  "rule_distribution": {
+    "R0": 353,
+    "R1": 184,
+    "R4": 43,
+    "R7": 29,
+    "R2": 19,
+    "R5": 16,
+    "R6": 7,
+    "R3": 7
+  },
+  "confidence": {
+    "mean": 0.842,
+    "below_0.6": 26
+  },
+  "positive_rate": {
+    "machine": 0.3845,
+    "published": 0.3343
+  },
+  "agreement_with_published": {
+    "disputed": {
+      "n": 375,
+      "agree": 354,
+      "agreement": 0.944
+    },
+    "unanimous_sample": {
+      "n": 283,
+      "agree": 265,
+      "agreement": 0.9364
+    }
+  },
+  "disputed_rows": {
+    "n": 375,
+    "model_sides_with": {
+      "ACN": 0.9467,
+      "BME": 0.48,
+      "AIP": 0.512
+    },
+    "model_matches_published_majority": 0.944
+  },
+  "unanimous_rows_estimate": {
+    "n": 283,
+    "machine_disagrees": 18,
+    "estimated_published_label_error_rate": 0.0636,
+    "wilson_95": [
+      0.0406,
+      0.0983
+    ],
+    "direction": {
+      "machine_1_published_0": 16,
+      "machine_0_published_1": 2
+    },
+    "by_length": {
+      "short": {
+        "n": 93,
+        "disagree": 6
+      },
+      "medium": {
+        "n": 95,
+        "disagree": 8
+      },
+      "long": {
+        "n": 95,
+        "disagree": 4
+      }
+    },
+    "by_published_label": {
+      "0": {
+        "n": 146,
+        "disagree": 16
+      },
+      "1": {
+        "n": 137,
+        "disagree": 2
+      }
+    }
+  }
+}
