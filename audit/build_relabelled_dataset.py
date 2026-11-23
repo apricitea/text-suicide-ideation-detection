@@ -45,6 +45,7 @@ def main() -> int:
     ten, cur = load_frame()
     rows = select(args.mode, ten, cur)
     m = rows.merge(led, left_on="row_index", right_on="i", how="inner")
+    m = m.drop_duplicates(subset=["key"], keep="first")  # one row per corpus text
     m = m.assign(
         corpus_index=m["index"] if "index" in m.columns else m["row_index"],
         coder_agreement=np.where(m[CODERS].notna().all(axis=1),

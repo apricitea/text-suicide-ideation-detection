@@ -1,0 +1,92 @@
+{
+  "mode": "full",
+  "ledger": "audit/out/relabel-full.jsonl",
+  "rows_in_ledger": 10398,
+  "rows_selected": 14562,
+  "rows_joined": 6142,
+  "models": [
+    "deepseek/deepseek-v4.1-flash-1017"
+  ],
+  "prompt_versions": [
+    "01d25055c81b"
+  ],
+  "undecidable": 2,
+  "rule_distribution": {
+    "R0": 3855,
+    "R1": 1031,
+    "R4": 425,
+    "R7": 340,
+    "R5": 251,
+    "R6": 105,
+    "R2": 86,
+    "R3": 47,
+    "R9": 2
+  },
+  "confidence": {
+    "mean": 0.823,
+    "below_0.6": 367
+  },
+  "positive_rate": {
+    "machine": 0.2594,
+    "published": 0.2019
+  },
+  "agreement_with_published": {
+    "full": {
+      "n": 6140,
+      "agree": 5713,
+      "agreement": 0.9305
+    }
+  },
+  "disputed_rows": {
+    "n": 225,
+    "model_sides_with": {
+      "ACN": 0.9467,
+      "BME": 0.5111,
+      "AIP": 0.4889
+    },
+    "model_matches_published_majority": 0.9467
+  },
+  "unanimous_rows_estimate": {
+    "n": 5915,
+    "machine_disagrees": 415,
+    "estimated_published_label_error_rate": 0.0702,
+    "wilson_95": [
+      0.0639,
+      0.077
+    ],
+    "direction": {
+      "machine_1_published_0": 378,
+      "machine_0_published_1": 37
+    },
+    "by_length": {
+      "short": {
+        "n": 1506,
+        "disagree": 142
+      },
+      "medium": {
+        "n": 1726,
+        "disagree": 123
+      },
+      "long": {
+        "n": 2683,
+        "disagree": 150
+      }
+    },
+    "by_published_label": {
+      "0": {
+        "n": 4726,
+        "disagree": 378
+      },
+      "1": {
+        "n": 1189,
+        "disagree": 37
+      }
+    }
+  },
+  "duplicate_texts": {
+    "rows_annotated_more_than_once": 6251,
+    "distinct_texts_repeat_annotated": 1995,
+    "repeat_texts_with_one_machine_label": 1957,
+    "repeat_texts_with_differing_published_labels": 2
+  }
+}

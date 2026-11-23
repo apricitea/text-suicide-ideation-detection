@@ -1,0 +1,13 @@
+{
+  "rows_annotated": 658,
+  "undecidable": 0,
+  "model_positive_rate": 0.3845,
+  "agreement_with_published_label": 0.9407,
+  "agreement_disputed": 0.944,
+  "n_disputed": 375,
+  "agreement_unanimous_sample": 0.9364,
+  "n_unanimous_sample": 283,
+  "model_sides_with_ACN_when_disputed": 0.9467,
+  "model_sides_with_BME_when_disputed": 0.48,
+  "model_sides_with_AIP_when_disputed": 0.512
+}

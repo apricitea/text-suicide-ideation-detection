@@ -58,6 +58,17 @@ def main() -> int:
     m = rows.merge(led, left_on="row_index", right_on="i", how="inner")
     m = m.assign(published=m["label"].astype(int), machine=m["machine"].astype(float))
 
+    # The corpus contains exact/near duplicates, so a text can appear on several rows. Count each
+    # text once for the agreement figures, and use the repeats as a self-consistency check.
+    dup = m[m.duplicated("key", keep=False)]
+    duplicate_texts = {
+        "rows_annotated_more_than_once": int(len(dup)),
+        "distinct_texts_repeat_annotated": int(dup["key"].nunique()),
+        "repeat_texts_with_one_machine_label": int((dup.groupby("key")["machine"].nunique() <= 1).sum()),
+        "repeat_texts_with_differing_published_labels": int((dup.groupby("key")["published"].nunique() > 1).sum()),
+    }
+    m = m.drop_duplicates(subset=["key"], keep="first")
+
     rep: dict = {
         "mode": args.mode,
         "ledger": str(ledger_path.relative_to(REPO)),
@@ -79,6 +90,7 @@ def main() -> int:
         "agreement_with_published": {},
         "disputed_rows": {},
         "unanimous_rows_estimate": {},
+        "duplicate_texts": duplicate_texts,
     }
 
     scored = m[m["machine"].notna()]
@@ -167,6 +179,15 @@ def main() -> int:
             "human adjudication.",
         ]
     lines += [
+        "",
+        "## Duplicate texts",
+        "",
+        f"- {duplicate_texts['rows_annotated_more_than_once']} rows share their text with another row "
+        f"({duplicate_texts['distinct_texts_repeat_annotated']} distinct texts); the agreement figures above "
+        "count each text once",
+        f"- of those repeated texts, {duplicate_texts['repeat_texts_with_one_machine_label']} got a single machine "
+        f"label and {duplicate_texts['repeat_texts_with_differing_published_labels']} carry differing *published* "
+        "labels (same text, different gold label)",
         "",
         "## The machine annotator's own behaviour",
         "",

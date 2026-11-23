@@ -1,0 +1,17 @@
+{
+  "rows_annotated": 2068,
+  "undecidable": 0,
+  "model_positive_rate": 0.2524,
+  "rule_distribution": {
+    "R0": 1323,
+    "R1": 338,
+    "R4": 146,
+    "R7": 117,
+    "R5": 83,
+    "R2": 31,
+    "R6": 23,
+    "R3": 7
+  },
+  "model": "deepseek/deepseek-v4.1-flash-1017",
+  "prompt_version": "01d25055c81b"
+}
